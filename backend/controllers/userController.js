@@ -44,11 +44,12 @@ registerUser = asyncHandler(async (req, res, next) => {
         email,
         password,
         pic,
-    }).then(() => {
+    }).then(async () => {
         generateToken(user._id);
+        const allUsers = await User.find({});
         req.session.isLoggin = true;
         req.session.email = email;
-        res.render('home', { user: mongooseToObject(user) });
+        res.render('home', { user: mongooseToObject(user), allUsers: multipleMongooseToObject(allUsers) });
     }).catch(err => {
         res.status(400);
         res.json({ messgae: 'Failed To Create User' })
