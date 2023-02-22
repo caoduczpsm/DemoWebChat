@@ -1,0 +1,54 @@
+<div class="mt-4 mb-4">
+
+
+
+    <div class="app">
+
+        {{> header}}
+
+        <div class="container" style="min-height: 600px;">
+
+            {{{body}}}
+
+        </div>
+
+        {{> footer}}
+
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="profileModal"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="profileModalLabel">Your Profile</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">@</span>
+                        </div>
+                        <input type="text" class="form-control" placeholder={{user.name}} aria-label="Username"
+                            aria-describedby="basic-addon1" id="newName" name="newName">
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">@</span>
+                        </div>
+                        <input type="text" class="form-control" placeholder={{user.email}} aria-label="Username"
+                            aria-describedby="basic-addon1" id="newEmail" name="newEmail">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <a href="/user/{{user._id}}/edit-profile" class="btn btn-primary">Save changes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
