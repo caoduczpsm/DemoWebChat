@@ -24,7 +24,6 @@ showRegisterForm = asyncHandler(async (req, res) => {
 
 registerUser = asyncHandler(async (req, res, next) => {
 
-    res.render('register');
     const { name, email, password, pic } = req.body;
 
     if (!name || !email || !password) {
@@ -50,9 +49,9 @@ registerUser = asyncHandler(async (req, res, next) => {
         req.session.isLoggin = true;
         req.session.email = email;
         res.render('home', { user: mongooseToObject(user), allUsers: multipleMongooseToObject(allUsers) });
-    }).catch(err => {
+    }).catch(error => {
         res.status(400);
-        res.json({ messgae: 'Failed To Create User' })
+        res.json({ messgae: error.message })
     });
 
 });
