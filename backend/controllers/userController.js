@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
 const generateToken = require('../config/generateToken');
 const { find } = require('../models/User');
-const { mongooseToObject } = require('../util/mongoose');
+const { mongooseToObject, multipleMongooseToObject } = require('../util/mongoose');
 const express = require('express');
 const session = require('express-session');
 
@@ -58,13 +58,13 @@ registerUser = asyncHandler(async (req, res, next) => {
 
 authUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
-
     const user = await User.findOne({ email });
     thisUser = user;
-    req.session.email = email;
     if (user && (await user.matchPassword(password))) {
         req.session.isLoggin = true;
-        res.render('home', { user: mongooseToObject(user) });
+        req.session.email = user.email;
+        const allUsers = await User.find({});
+        res.render('home', { user: mongooseToObject(user), allUsers: multipleMongooseToObject(allUsers) });
     } else {
         res.status(400);
         res.json({ messgae: 'Invalid Email or Password' })

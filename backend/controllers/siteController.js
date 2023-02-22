@@ -1,6 +1,6 @@
 
 const User = require('../models/User');
-const { mongooseToObject } = require('../util/mongoose');
+const { mongooseToObject, multipleMongooseToObject } = require('../util/mongoose');
 
 // const express = require('express');
 // const session = require('express-session');
@@ -18,7 +18,8 @@ class siteController {
         if (req.session.isLoggin) {
             let email = req.session.email;
             const user = await User.findOne({ email });
-            res.render('home', { user: mongooseToObject(user) });
+            const allUsers = await User.find({});
+            res.render('home', { user: mongooseToObject(user), allUsers: multipleMongooseToObject(allUsers) });
             return;
         }
         res.render('login');
