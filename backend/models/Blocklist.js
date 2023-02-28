@@ -21,6 +21,7 @@ const blockListSchema = new dynamoose.Schema({
     lastName: { type: "String", required: true },
     password: { type: "String", required: true },
     ssn: { type: "String", required: true },
+    blockhistory: { type: "String", required: true },
 },
     // {
     //     "timestamps": {

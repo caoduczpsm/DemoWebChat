@@ -86,7 +86,6 @@ authUser = asyncHandler(async (req, res) => {
         // });
 
         localStorage.setItem('userInfo', user.email);
-        console.log(localStorage.getItem('userInfo'));
         res.render('home');
     } else {
         res.status(401);
