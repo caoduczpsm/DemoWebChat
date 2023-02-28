@@ -1,12 +1,5 @@
-
 const User = require('../models/User');
-const { mongooseToObject, multipleMongooseToObject } = require('../util/mongoose');
-
-// const express = require('express');
-// const session = require('express-session');
-
-// const app = express();
-// app.use(session({ secret: 'ncaoduc', resave: true, saveUninitialized: true }))
+const { dynamooseToObject, multipleDynamooseToObject } = require('../util/mongoose');
 
 class siteController {
     // GET /
@@ -16,10 +9,31 @@ class siteController {
 
     async login(req, res, next) {
         if (req.session.isLoggin) {
-            let email = req.session.email;
-            const user = await User.findOne({ email });
-            const allUsers = await User.find({});
-            res.render('home', { user: mongooseToObject(user), allUsers: multipleMongooseToObject(allUsers) });
+            const { email, password } = req.body;
+
+            const user = await User.get({ "email": email });
+
+            const id = user._id;
+
+            const token = jwt.sign({ id }, 'ncaoduc@tma.com.vn', {
+                expiresIn: "30d",
+            });
+
+            if (user && (user.password === password)) {
+                // res.json({
+                //     email: user.email,
+                //     _id: user._id,
+                //     name: user.name,
+                //     isAdmin: user.isAdmin,
+                //     pic: user.pic,
+                //     token: token
+                // });
+                res.render('home');
+
+            } else {
+                res.status(401);
+                throw new Error("Invalid Email or Password");
+            }
             return;
         }
         res.render('login');

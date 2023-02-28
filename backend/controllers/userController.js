@@ -1,17 +1,19 @@
 const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
-const generateToken = require('../config/generateToken');
-const { find } = require('../models/User');
-const { mongooseToObject, multipleMongooseToObject } = require('../util/mongoose');
+const { dynamooseToObject } = require('../util/mongoose');
 const express = require('express');
 const session = require('express-session');
+const { v4: uuidv4 } = require('uuid');
+const LocalStorage = require('node-localstorage').LocalStorage;
+
+localStorage = new LocalStorage('./scratch');
 
 const app = express();
 app.use(session({ secret: 'ncaoduc', resave: true, saveUninitialized: true }))
 
 index = asyncHandler(async (req, res) => {
     if (req.session.isLoggin)
-        res.render('home', { user: mongooseToObject(thisUser) });
+        res.render('home', { user: dynamooseToObject(thisUser) });
     else {
         res.status(400);
         res.json({ messgae: 'Requied Login' })
@@ -31,64 +33,81 @@ registerUser = asyncHandler(async (req, res, next) => {
         res.json({ messgae: 'Plesase Enter All The Fields' })
     }
 
-    const userExists = await User.findOne({ email });
+    const userExists = await User.get({ "email": email });
 
     if (userExists) {
         res.status(400);
-        res.json({ messgae: 'User Already Exists' })
+        throw new Error("User already exists");
     }
 
+    const _id = uuidv4();
+
     const user = await User.create({
-        name,
         email,
+        _id,
+        name,
         password,
         pic,
-    }).then(async () => {
-        generateToken(user._id);
-        const allUsers = await User.find({});
+    })
+
+    if (user) {
         req.session.isLoggin = true;
         req.session.email = email;
-        res.render('home', { user: mongooseToObject(user), allUsers: multipleMongooseToObject(allUsers) });
-    }).catch(error => {
+        res.render('home');
+    } else {
         res.status(400);
         res.json({ messgae: error.message })
-    });
+    }
 
 });
 
+
 authUser = asyncHandler(async (req, res) => {
+
+
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    thisUser = user;
-    if (user && (await user.matchPassword(password))) {
-        req.session.isLoggin = true;
-        req.session.email = user.email;
-        const allUsers = await User.find({});
-        res.render('home', { user: mongooseToObject(user), allUsers: multipleMongooseToObject(allUsers) });
+
+    const user = await User.get({ "email": email });
+
+    //const id = user._id;
+
+    // const token = jwt.sign({ id }, 'ncaoduc@tma.com.vn', {
+    //     expiresIn: "30d",
+    // });
+
+    if (user && (user.password === password)) {
+        // res.json({
+        //     email: user.email,
+        //     _id: user._id,
+        //     name: user.name,
+        //     isAdmin: user.isAdmin,
+        //     pic: user.pic,
+        //     token: token
+        // });
+
+        localStorage.setItem('userInfo', user.email);
+        console.log(localStorage.getItem('userInfo'));
+        res.render('home');
     } else {
-        res.status(400);
-        res.json({ messgae: 'Invalid Email or Password' })
+        res.status(401);
+        throw new Error("Invalid Email or Password");
     }
 });
 
 
 logout = asyncHandler(async (req, res) => {
-    if (req.session.isLoggin) {
-        req.session.destroy(function (err) {
-            res.render('login')
-        });
-    }
+    res.render('login')
 });
 
-updateProfile = asyncHandler(async (req, res) => {
+// updateProfile = asyncHandler(async (req, res) => {
 
-    const email = req.session.email;
-    const formData = req.body;
-    const user = await User.findOne({ email });
-    user.updateOne({ _id: user._id }, formData).then(() => {
-        res.json(user);
-    });
-});
+//     const email = req.session.email;
+//     const formData = req.body;
+//     const user = await User.findOne({ email });
+//     user.updateOne({ _id: user._id }, formData).then(() => {
+//         res.json(user);
+//     });
+// });
 
 // /api/user?search=weiorwe
 // allUsers = asyncHandler(async (req, res) => {
@@ -106,4 +125,4 @@ updateProfile = asyncHandler(async (req, res) => {
 // });
 
 
-module.exports = { registerUser, authUser, index, logout, showRegisterForm, updateProfile };
+module.exports = { registerUser, authUser, index, logout, showRegisterForm };
