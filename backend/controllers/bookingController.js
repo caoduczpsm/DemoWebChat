@@ -14,13 +14,17 @@ checkUserInBlocklist = asyncHandler(async (req, res, next) => {
     //console.log(userEmail);
     const blocklist = await BlockList.get({ "email": userEmail });
     //console.log(blocklist);
-    const blockHistoryId = blocklist.blockhistory;
-    //console.log(blockHistoryId);
-    const blockHistory = await BlockHistory.get({ "_id": blockHistoryId });
-    //console.log(blockHistory);
-    if (blocklist && (blockHistory.blockstate === "BLOCKED")) {
-        res.status(403);
-        res.json({ message: "Please contact to admin system to book this rom!" });
+    if (blocklist) {
+        const blockHistoryId = blocklist.blockhistory;
+        //console.log(blockHistoryId);
+        const blockHistory = await BlockHistory.get({ "_id": blockHistoryId });
+        //console.log(blockHistory);
+        if (blocklist && (blockHistory.blockstate === "BLOCKED")) {
+            res.status(403);
+            res.json({ message: "Please contact to admin system to book this rom!" });
+        } else {
+            next();
+        }
     } else {
         next();
     }
