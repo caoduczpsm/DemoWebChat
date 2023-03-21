@@ -1,0 +1,48 @@
+// Tạo một workflow client
+WorkflowInstanceFactory<DemoWorkflow> factory = 
+    nflowEngine.getWorkflowInstanceFactory(DemoWorkflow.class);
+
+// Đăng ký workflow type
+nflowEngine.getWorkflowDefinitionService().deployWorkflowDefinition(DemoWorkflow.class);
+
+// Tạo một đối tượng DateTime cách 30 phút so với thời điểm hiện tại
+DateTime startAfter = new DateTime().plusMinutes(30);
+
+// Start workflow sau 30 phút
+factory.newWorkflowInstanceBuilder()
+    .setBusinessKey("demo")
+    .setStartAfter(startAfter)
+    .build()
+    .start();
+
+/////////////////////////////////////////////
+
+// Tạo một ConcurrentHashMap để lưu id của workflow
+ConcurrentHashMap<String, Long> map = new ConcurrentHashMap<>();
+
+// Tạo một workflow client
+WorkflowInstanceFactory<DemoWorkflow> factory = 
+    nflowEngine.getWorkflowInstanceFactory(DemoWorkflow.class);
+
+// Đăng ký workflow type
+nflowEngine.getWorkflowDefinitionService().deployWorkflowDefinition(DemoWorkflow.class);
+
+// Tạo một đối tượng DateTime cách 30 phút so với thời điểm hiện tại
+DateTime startAfter = new DateTime().plusMinutes(30);
+
+// Start workflow sau 30 phút và lưu id vào map với key là "demo"
+long id = factory.newWorkflowInstanceBuilder()
+    .setBusinessKey("demo")
+    .setStartAfter(startAfter)
+    .build()
+    .start();
+map.put("demo", id);
+
+// Stop workflow bằng cách lấy id từ map với key là "demo"
+if (map.containsKey("demo")) {
+  long idToStop = map.get("demo");
+  nflowEngine.stopWorkflow(idToStop);
+  // Xóa id khỏi map
+  map.remove("demo");
+}
+
