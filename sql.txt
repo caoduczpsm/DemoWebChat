@@ -1,0 +1,29 @@
+reservationProviderList.forEach(rp -> {
+                rp.forEach((reservation, provider) -> {
+                    cancelledLineItemList.addAll(reservation
+                            .getAllLineItems().stream().filter(lineItem -> lineItem.productId.equals(breakfastProductId)
+                                    && dateList.contains(lineItem.serviceDate) && lineItem.isActive() && lineItem.confirmed != null)
+                            .collect(Collectors.toList()));
+                    if (nonNormalPaymentStringList.contains(provider)) {
+                        reservationSendToCustomerService.add(reservation);
+                    } else {
+                        reservationNeedToRefund.add(reservation);
+                    }
+                });
+            });
+
+
+SELECT pa.payment_service_provider
+                    FROM nelson.reservation r
+                        LEFT JOIN nelson.line_item l ON l.reservation_id = r.id
+                        LEFT JOIN nelson.payment p ON p.reservation_code = r.reservation_code
+                        LEFT JOIN nelson.payment_account pa ON p.payment_account_id = pa.id
+                    WHERE r.state != 'CANCELED'
+                        AND r.hotel_id = 11
+                        AND p.amount > 0
+                        AND l.product_id = 5
+                        AND l.cancelled IS NULL
+                        AND l.refundable IS TRUE
+--                     	AND pa.payment_service_provider IN ('PAYTRAIL_2', 'MOBILE_NETS')
+                    GROUP BY (r.id, pa.payment_service_provider) 
+                    HAVING COUNT(DISTINCT pa.payment_service_provider) <= 2
