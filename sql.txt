@@ -14,6 +14,22 @@ reservationProviderList.forEach(rp -> {
                     }
                 });
             });
+            
+Map<Reservation, String> test = new HashMap<Reservation, String>();
+
+reservationProviderList.forEach(rp -> {
+                rp.forEach((reservation, provider) -> {
+                    if (nonNormalPaymentStringList.contains(provider)) {
+                        reservationSendToCustomerService.add(reservation);
+                        test.put(reservation, provider);
+                    }
+                });
+            });
+
+reservationProviderList.forEach((reservation, provider) -> {
+                if(!test.containsKey(reservation))
+                        reservationNeedToRefund.add(reservation);
+                });
 
 
 public List<Map<Reservation, String>> getReservationsHaveProductOnSpecifiedDate(Long hotelId, Long productId, List<LocalDate> dateList, Instant instant) {
