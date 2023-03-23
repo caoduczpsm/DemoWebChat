@@ -1,3 +1,6 @@
+List<Map<Reservation, String>> reservationProviderList = reservations.getReservationsHaveProductOnSpecifiedDate(hotelId,
+                breakfastProductId, dateList, now);
+
 reservationProviderList.forEach(rp -> {
                 rp.forEach((reservation, provider) -> {
                     cancelledLineItemList.addAll(reservation
