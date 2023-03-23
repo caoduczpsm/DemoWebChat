@@ -16,17 +16,22 @@ reservationProviderList.forEach(rp -> {
             });
 
 
-SELECT pa.payment_service_provider
-                    FROM nelson.reservation r
-                        LEFT JOIN nelson.line_item l ON l.reservation_id = r.id
-                        LEFT JOIN nelson.payment p ON p.reservation_code = r.reservation_code
-                        LEFT JOIN nelson.payment_account pa ON p.payment_account_id = pa.id
-                    WHERE r.state != 'CANCELED'
-                        AND r.hotel_id = 11
-                        AND p.amount > 0
-                        AND l.product_id = 5
-                        AND l.cancelled IS NULL
-                        AND l.refundable IS TRUE
---                     	AND pa.payment_service_provider IN ('PAYTRAIL_2', 'MOBILE_NETS')
-                    GROUP BY (r.id, pa.payment_service_provider) 
-                    HAVING COUNT(DISTINCT pa.payment_service_provider) <= 2
+public List<Map<Reservation, String>> getReservationsHaveProductOnSpecifiedDate(Long hotelId, Long productId, List<LocalDate> dateList, Instant instant) {
+        String sql = "SELECT r.*, pa.payment_service_provider \n"
+                    + "FROM reservation r \n"
+                    + "    LEFT JOIN line_item l ON l.reservation_id = r.id \n"
+                    + "    LEFT JOIN payment p ON p.reservation_code = r.reservation_code \n"
+                    + "    LEFT JOIN payment_account pa ON p.payment_account_id = pa.id\n"
+                    + "WHERE r.state != 'CANCELED'\n"
+                    + "    AND r.hotel_id = :hotel_id \n"
+                    + "    AND p.amount > 0 \n"
+                    + "    AND l.product_id = :product_id \n"
+                    + "    AND l.cancelled IS NULL \n"
+                    + "    AND l.refundable IS TRUE \n"
+                    + "    AND l.service_date IN (:notAvailableDate) \n"
+                    + "GROUP BY (r.id, pa.payment_service_provider) \n";
+        return jdbcTemplate.query(sql,
+                new MapSqlParameterSource().addValue("hotel_id", hotelId)
+                        .addValue("product_id", productId).addValue("notAvailableDate", dateList),
+                this::reservationMapMapping);
+    }
